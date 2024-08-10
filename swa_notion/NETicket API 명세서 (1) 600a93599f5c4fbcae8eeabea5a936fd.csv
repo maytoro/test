@@ -1,0 +1,295 @@
+﻿기능,HTTP 메서드,API URL,Request Header,Request,Response,Response Header,비고
+회원가입 페이지 이동,GET,/neticket/signup,,,"ModelAndView(""signup"")",,PageController
+로그인페이지 이동,GET,/neticket/login,,,"ModelAndView(""login"")",,PageController
+메인페이지 이동,GET,/neticket,,,"ModelAndView(""index"")",,PageController
+상세페이지 이동,GET,/neticket/events/{eventId},,,"ModelAndView(""detail"")",,PageController
+예매중 페이지 이동,GET,/neticket/reservations/in-progress/{ticketInfoId},,,"ModelAndView(""reservation"")",,PageController
+예매 완료 페이지 이동,GET,/neticket/reservations/completed/{resvId},,,"ModelAndView(""completed"")",,PageController
+공연 추가 페이지 이동,GET,/neticket/admin/event,,,"ModelAndView(""addevent"")",,PageController
+마이 페이지 이동,GET,/neticket/user/{nickname},,,"ModelAndView(""mypage"")",,PageController
+검색 페이지 이동,GET,/neticket/search,,,"ModelAndView(""search"")",,PageController
+,,,,,,,PageController
+회원가입,POST,/api/neticket/signup,,"body json
+{
+""email"": ""abc@abc.com"",
+""password"": ""password11@"",
+""nickname"": ""닉네임""
+}","{
+    ""msg"": ""회원가입 완료"",
+    ""statusCode"": 201
+}",,UserController
+로그인,POST,/api/neticket/login,,"body json
+{
+    ""email"": ""abc@abc.com"",
+    ""password"": ""password11@""
+}","{
+    ""msg"": ""로그인 완료"",
+    ""statusCode"": 200
+}
+",Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiaW4xMjM0IiwiZXhwIjoxNjY5ODcwNDUyLCJpYXQiOjE2Njk4NjY4NTJ9.mm8wgaV8M70hidhPX4Ut6UONZGaxjA1KnOJT1mO59Xc,"UserController
+"
+마이페이지,GET,/api/neticket/user,"header
+Authorization: 토큰정보",,"{
+""image"": ""randomUUID_xx콘서트.jpg"",
+”resvId”: 12345,
+”title”: “공연제목”,
+”place”: “공연장소”,
+”date”: “공연날짜”,
+”totalPrice”: “총 가격(매수*1장당가격)”,
+”count”: “매수”
+},
+….
+{
+""image"": ""randomUUID_xx콘서트.jpg"",
+”resvId”: 12346,
+”title”: “공연제목”,
+”place”: “공연장소”,
+”date”: “공연날짜”,
+”totalPrice”: “총 가격(매수*1장당가격)”,
+”count”: “매수”
+}",,UserController
+,,,,,,,
+Redis 좌석 수 저장,POST,"/api/neticket/cache/left-seats/{ticketInfoId}
+
+(@Pathvariable)","header
+Authorization: 토큰정보",,"{
+    ""msg"": ""redis에 성공적으로 저장되었습니다."",
+    ""statusCode"": 201
+}",,AdminController
+Redis 좌석 수 삭제,DELETE,"/api/neticket/cache/left-seats/{ticketInfoId}
+
+(@Pathvariable)","header
+Authorization: 토큰정보",,"{
+    ""msg"": ""redis에 성공적으로 삭제되었습니다."",
+    ""statusCode"": 200
+}",,AdminController
+Redis 좌석 수 리스트 조회,GET,/api/neticket/cache/left-seats,"header
+Authorization: 토큰정보",,"[
+""ls47"",
+""ls25"",
+…..
+""ls18"",
+""ls10""
+]",,AdminController
+Redis 좌석 수 갱신,Patch,"/api/neticket/cache/left-seats/{ticketInfoId}
+
+(@Pathvariable)","header
+Authorization: 토큰정보",,"{
+    ""msg"": ""redis와 DB의 남은 좌석수를 올바르게 맞췄습니다."",
+    ""statusCode"": 200
+}",,AdminController
+"DB, Redis 공연 정보 리셋",Patch,/api/neticket/cache,"header
+Authorization: 토큰정보",,"{
+    ""msg"": ""공연 상태를 성공적으로 조정했습니다."",
+    ""statusCode"": 200
+}",,AdminController
+,,,,,,,
+메인페이지 조회,GET,"/api/neticket/events/?page=1
+
+(@RequestParam)",,"param(쿼리스트링)
+{
+”page” : int 현재페이지
+}","공연카드 페이지 반환
+{
+""content"": [
+{
+""id"": 4,
+""title"": ""어느유명한가수콘서트4"",
+""date"": ""2023-04-09"",
+""place"": ""잠실어디가경기장"",
+""image"": ""imageurl"",
+”available"": true
+},
+…
+{
+""id"": 5,
+""title"": ""어느유명한가수콘서트5"",
+""date"": ""2023-04-11"",
+""place"": ""잠실어디가경기장"",
+""image"": ""imageurl"",
+”available"": true
+}
+],
+""pageable"": {
+""sort"": {
+""empty"": true,
+""sorted"": false,
+""unsorted"": true
+},
+""offset"": 0,
+""pageSize"": 8,
+""pageNumber"": 0,
+""unpaged"": false,
+""paged"": true
+},
+""last"": true,
+""totalElements"": 5,
+""totalPages"": 1,
+""size"": 8,
+""number"": 0,
+""sort"": {
+""empty"": true,
+""sorted"": false,
+""unsorted"": true
+},
+""first"": true,
+""numberOfElements"": 5,
+""empty"": false
+}",,"EventController
+"
+상세 페이지 조회,GET,"/api/neticket/events/{eventId}
+
+(@Pathvariable)",,,"{
+""image"": ""randomUUID_xx콘서트.jpg"",
+”eventId”: 12345,
+”title”: “공연제목”,
+”place”: “공연장소”,
+”price”: “ 가격(1장당가격)”,
+”date”: “공연날짜”,
+”ticketInfoDto”: 
+[
+”ticketInfoid”: 1,
+”openDate”: “티켓오픈시간,
+”leftSeate”: “남은 좌석 수”
+]
+}",,"EventController
+
+"
+공연 추가,POST,"/api/neticket/events
+
+메인페이지에 관리자만
+공연추가 버튼 활성화","header
+Authorization: 토큰정보","body
+{
+image: 이미지.jpg,
+dto: {
+""title"": ""공연명"",
+""place"": ""공연장소"",
+""price"": 120000,
+""date"": ""공연날짜"",
+""openDate"": ""티켓오픈시간"",
+""totalSeat"": 10000
+}
+}
+","{
+    ""msg"": ""공연이 추가되었습니다."",
+    ""statusCode"": 201
+}",,EventController
+검색기능,GET,"/api/neticket/events/search?keyword=검색어&page=1
+
+
+(@RequestParam)
+저가순 검색 정렬 예시",,"param(쿼리스트링)
+{
+”keyword” : 검색어,
+”page” : int 현재페이지
+}","검색결과 공연 카드로 반환
+{
+""content"": [
+{
+""id"": 1,
+""title"": ""어느유명한가수콘서트1"",
+""date"": ""2023-08-01"",
+""place"": ""잠실어디가경기장"",
+""image"": ""imageurl"",
+”available"": true
+},
+…
+{
+""id"": 2,
+""title"": ""어느유명한가수콘서트2"",
+""date"": ""2023-07-07"",
+""place"": ""잠실어디가경기장"",
+""image"": ""imageurl"",
+”available"": true
+}
+],
+""pageable"": {
+""sort"": {
+""empty"": false,
+""sorted"": true,
+""unsorted"": false
+},
+""offset"": 0,
+""pageSize"": 8,
+""pageNumber"": 0,
+""unpaged"": false,
+""paged"": true
+},
+""last"": true,
+""totalPages"": 1,
+""totalElements"": 5,
+""size"": 8,
+""number"": 0,
+""sort"": {
+""empty"": false,
+""sorted"": true,
+""unsorted"": false
+},
+""first"": true,
+""numberOfElements"": 5,
+""empty"": false
+}
+",,"EventController
+
+
+"
+,,,,,,,
+예매중 확인하기,GET,"/api/neticket/ticket-info/{ticketInfoId}
+
+(@Pathvariable)",,,"{
+""image"": ""randomUUID_xx콘서트.jpg"",
+”eventId”: 12345,
+”title”: “공연제목”,
+”place”: “공연장소”,
+”price”: “ 가격(1장당가격)”,
+”date”: “공연날짜”,
+”ticketInfoDto”: 
+[
+”ticketInfoid”: 1,
+”openDate”: “티켓오픈시간,
+”leftSeate”: “남은 좌석 수”
+]
+}",,ReservationController
+예매하기,POST,/api/neticket/reservations,"header
+Authorization: 토큰정보","body
+{
+”ticketInfoId”: 1,
+”count”: 3
+}
+","(예매성공)
+{
+예매 번호 
+}
+
+(예매실패)
+{
+    ""msg"": ""예매실패"",
+    ""statusCode"": 예외처리코드
+}",,ReservationController
+예매완료,GET,"/api/neticket/reservations/{reservationId}
+
+(@Pathvariable)","header
+Authorization: 토큰정보",,"{
+""image"": ""randomUUID_xx콘서트.jpg"",
+”resvId”: 12345,
+”title”: “공연제목”,
+”place”: “공연장소”,
+”date”: “공연날짜”,
+”totalPrice”: “총 가격(매수*1장당가격)”,
+”count”: “매수”
+}",,ReservationController
+예매 취소,DELETE,"/api/neticket/reservations/{resvId}
+
+(@Pathvariable)","header
+Authorization: 토큰정보",,"(예매취소성공)
+{
+    ""msg"": ""예매 기록이 성공적으로 삭제되었습니다."",
+    ""statusCode"": 200
+}
+
+(예매취소실패)
+{
+    ""msg"": ""예매실패"",
+    ""statusCode"": 예외처리코드
+}",,ReservationController
